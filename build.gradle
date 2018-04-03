@@ -1,0 +1,41 @@
+group 'Diploma'
+version '1.0-SNAPSHOT'
+
+apply plugin: 'java'
+apply plugin: 'eclipse'
+apply plugin: 'spring-boot'
+
+buildscript {
+    ext {
+        springBootVersion = '1.4.0.RELEASE'
+    }
+    repositories {
+        mavenCentral()
+    }
+    dependencies {
+        classpath("org.springframework.boot:spring-boot-gradle-plugin:${springBootVersion}")
+    }
+}
+
+jar {
+    baseName = 'InfoSearchProject'
+    version = '0.0.1-SNAPSHOT'
+}
+
+sourceCompatibility = 1.5
+targetCompatibility = 1.8
+
+repositories {
+    mavenCentral()
+}
+
+dependencies {
+    //compile('org.springframework.boot:spring-boot-starter-aop')
+    //compile('org.springframework.boot:spring-boot-starter-data-rest')
+    compile('org.springframework.boot:spring-boot-starter-web')
+    compile('org.springframework.boot:spring-boot-starter-freemarker')
+    //compile('org.springframework.session:spring-session')
+
+    testCompile('org.springframework.boot:spring-boot-starter-test')
+}
+
