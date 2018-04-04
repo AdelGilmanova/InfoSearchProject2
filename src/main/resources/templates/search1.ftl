@@ -19,7 +19,9 @@
         <#list results as result>
             <p><a href="${(result)!}">${(result)!}</a></p>
         </#list>
-    <#else><p>${(answer)!}</p>
+    <#else>
+        <br>
+        <p>${(answer)!}</p>
     </#if>
 
 

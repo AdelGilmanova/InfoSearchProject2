@@ -8,13 +8,13 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
+import ru.kpfu.itis.util.Answer;
 import ru.kpfu.itis.util.CalculatorClass;
 import ru.kpfu.itis.util.Porter;
 
 import java.io.*;
 import java.nio.charset.Charset;
 import java.nio.file.Files;
-import java.nio.file.Path;
 import java.util.*;
 
 /**
@@ -85,7 +85,7 @@ public class MainController extends BaseController {
                 redirectAttributes.addFlashAttribute("results", list);
                 return "redirect:/search1";
             } else {
-                redirectAttributes.addFlashAttribute("answer", "no results");
+                redirectAttributes.addFlashAttribute("answer", "Не найдено");
             }
         }
         //если слов много
@@ -138,7 +138,7 @@ public class MainController extends BaseController {
                 }
                 redirectAttributes.addFlashAttribute("results", results);
             } else {
-                redirectAttributes.addFlashAttribute("answer", "no results");
+                redirectAttributes.addFlashAttribute("answer", "Не найдено");
             }
 
 
@@ -150,14 +150,11 @@ public class MainController extends BaseController {
     public String search2(@RequestParam(required = false) String text,
                           RedirectAttributes redirectAttributes) throws IOException {
         redirectAttributes.addFlashAttribute("text", text);
-        Map<String, Double> similarityMap = CalculatorClass.calculate(text);
-
-        HashSet<String> results = new HashSet<>();
         Map<String, String> index = index();
         Porter porter = new Porter();
 
         if (text.isEmpty()) {
-            redirectAttributes.addFlashAttribute("answer", "no results");
+            redirectAttributes.addFlashAttribute("answer", "Не найдено");
             return "redirect:/search2";
         }
         //преобразование слов в массив лемметированных слов
@@ -179,22 +176,28 @@ public class MainController extends BaseController {
 
         //если слово всего одно
         if (words.length == 1) {
-            ArrayList<String> list = new ArrayList<>();
+            TreeSet<Answer> results = new TreeSet<>(Collections.reverseOrder());
             if (filesList.contains(words[0])) {
+                Map<String, Double> similarityMap = CalculatorClass.calculate(text);
                 String name = "information/invert/" + words[0];
                 String line = getFileContent(name);
                 String lineData[] = line.split(" ");
                 for (String number : lineData) {
                     String name1 = number + ".txt";
                     if (index.containsKey(name1)) {
-                        //list.add(index.get(name1));
-                        list.add(getHeader(Integer.valueOf(number)));
+                        Answer answer = new Answer(
+                                index.get(name1),
+                                getAuthor(Integer.valueOf(number)),
+                                getHeader(Integer.valueOf(number)),
+                                similarityMap.get(number)
+                        );
+                        results.add(answer);
                     }
                 }
-                redirectAttributes.addFlashAttribute("results", list);
+                redirectAttributes.addFlashAttribute("results", results);
                 return "redirect:/search2";
             } else {
-                redirectAttributes.addFlashAttribute("answer", "no results");
+                redirectAttributes.addFlashAttribute("answer", "Не найдено");
             }
         }
         //если слов много
@@ -237,18 +240,27 @@ public class MainController extends BaseController {
                     }
                 }
             }
+
+            TreeSet<Answer> results = new TreeSet<>(Collections.reverseOrder());
             if (!resOfCon.isEmpty()) {
+                Map<String, Double> similarityMap = CalculatorClass.calculate(text);
                 //заполнение листа с урлами
                 for (String number : resOfCon) {
                     String name1 = number + ".txt";
                     if (index.containsKey(name1)) {
-                        //results.add(index.get(name1));
-                        results.add(getHeader(Integer.valueOf(number)));
+                        Answer answer = new Answer(
+                                index.get(name1),
+                                getAuthor(Integer.valueOf(number)),
+                                getHeader(Integer.valueOf(number)),
+                                similarityMap.get(number)
+                        );
+                        results.add(answer);
                     }
                 }
+                System.out.println(results);
                 redirectAttributes.addFlashAttribute("results", results);
             } else {
-                redirectAttributes.addFlashAttribute("answer", "no results");
+                redirectAttributes.addFlashAttribute("answer", "Не найдено");
             }
 
 
@@ -293,11 +305,15 @@ public class MainController extends BaseController {
 
     public String getHeader(Integer index) throws IOException {
         ApplicationContext appContext = new ClassPathXmlApplicationContext(new String[]{});
+        Resource resource = appContext.getResource("information/headers.txt");
+        List<String> headers = Files.readAllLines(resource.getFile().toPath(),Charset.forName("UTF-8"));
+        return headers.get(index-1);
+    }
+
+    public String getAuthor(Integer index) throws IOException {
+        ApplicationContext appContext = new ClassPathXmlApplicationContext(new String[]{});
         Resource resource = appContext.getResource("information/authors.txt");
-        Resource resource1 = appContext.getResource("information/headers.txt");
         List<String> authors = Files.readAllLines(resource.getFile().toPath(),Charset.forName("UTF-8"));
-        List<String> headers = Files.readAllLines(resource1.getFile().toPath(),Charset.forName("UTF-8"));
-        String value = authors.get(index) + ": " + headers.get(index);
-        return value;
+        return authors.get(index-1);
     }
 }

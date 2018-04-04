@@ -74,7 +74,7 @@ public class Porter {
             word = pre + rv;
 
         }
-
         return word;
     }
+
 }

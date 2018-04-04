@@ -1,3 +1,4 @@
+<#-- @ftlvariable name="results" type="java.util.TreeSet<ru.kpfu.itis.util.Answer>" -->
 <#include "temp/mainTemplate.ftl">
 <@main_template title="Поиск"/>
 
@@ -15,13 +16,18 @@
     <#if results?has_content>
         <br>
 
-        <p>Найдено</p>
+
     <div align="justify">
         <#list results as result>
-            <p><a href="${(result)!}">${(result)!}</a></p>
+            <p>Автор: ${(result.getAuthor())!}</p>
+            <p><a href="${(result.getAddress())!}">${(result.getHeader())!}</a></p>
+            <p>${(result.getSimilarity())!}</p>
+            <hr>
         </#list>
     </div>
-    <#else><p>${(answer)!}</p>
+    <#else>
+        <br>
+        <p>${(answer)!}</p>
     </#if>
 
 </div>

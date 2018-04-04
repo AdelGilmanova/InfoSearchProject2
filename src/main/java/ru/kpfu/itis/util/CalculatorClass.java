@@ -60,7 +60,7 @@ public class CalculatorClass {
         }
     }
 
-    public static Map<String, Double> calculate(String request) throws IOException{
+    public static Map<String, Double> calculate(String request) throws IOException {
         CalculatorClass calculator = new CalculatorClass();
 
         String[] words = request.split(" "); // разбиение запроса на слова
@@ -68,7 +68,7 @@ public class CalculatorClass {
         //загружаем список терминов
         List<String> terms = new ArrayList<>();
         ApplicationContext appContext = new ClassPathXmlApplicationContext(new String[]{});
-        Resource resource = appContext.getResource("information/terms.txt");
+        Resource resource = appContext.getResource("information/terms1.txt");
         FileInputStream fstream = new FileInputStream(resource.getFile());
         BufferedReader br = new BufferedReader(new InputStreamReader(fstream, "UTF-8"));
         String strLine;
@@ -144,6 +144,7 @@ public class CalculatorClass {
             similarityMapByDoc.put(doc, similarity);
         }
 
+        Answer.checking(similarityMapByDoc);
         System.out.println(similarityMapByDoc);
         return similarityMapByDoc;
     }
